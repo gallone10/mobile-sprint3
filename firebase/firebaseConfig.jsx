@@ -1,20 +1,18 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+
+
 const firebaseConfig = {
-  apiKey: "AIzaSyC9OmLuHYn1LiRhee2vDPKCGv3psyVp0Uc",
-  authDomain: "mobile-challenge-e4b54.firebaseapp.com",
-  projectId: "mobile-challenge-e4b54",
-  storageBucket: "mobile-challenge-e4b54.appspot.com",
-  messagingSenderId: "975008968011",
-  appId: "1:975008968011:web:2e8ad9865115fa43d80cce",
-  measurementId: "G-84EWZ2DLY9"
+  apiKey: "AIzaSyBscU8D0QLMufzqU_zE2D8RNkmywi99ERw",
+  authDomain: "challenge-mob.firebaseapp.com",
+  projectId: "challenge-mob",
+  storageBucket: "challenge-mob.appspot.com",
+  messagingSenderId: "462291191655",
+  appId: "1:462291191655:web:6036c700b56ca6db3191c2",
+  measurementId: "G-5JMPLYBQ1K"
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app)

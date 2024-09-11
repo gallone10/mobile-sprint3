@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { db, doc, updateDoc, deleteDoc } from '../firebase/firebaseConfig';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'; // Importando Firebase Auth
 
-const api = {
-  cadastrarUsuario:(email, senha) => {
-  },
-}
 
 const CadastroScreen = () => {
   const navigation = useNavigation();
@@ -14,16 +10,30 @@ const CadastroScreen = () => {
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
 
-  const navigateToCadastroError = () => {
-    navigation.navigate('CadastroError');
+  // Função de cadastro usando Firebase Auth
+  const cadastrarUsuario = (email, senha) => {
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, email, senha)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log('Usuário cadastrado:', user);
+        Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
+        navigation.navigate('Login'); // Redireciona para a tela de Login após o cadastro
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        console.log('Erro ao cadastrar:', errorMessage);
+        Alert.alert('Erro', errorMessage);
+
+      });
   };
 
-  const navigateToCadastro = () => {
+  const navegarToCadastro = () => {
     if (email && senha && confirmaSenha) {
       if (senha === confirmaSenha) {
-        navigation.navigate('Login');
+        cadastrarUsuario(email, senha); // Chamando a função de cadastro
       } else {
-        navigateToCadastroError();
+        Alert.alert('Erro', 'As senhas não coincidem');
       }
     } else {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos');
@@ -33,11 +43,9 @@ const CadastroScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Cadastre-se</Text>
-
       <View style={styles.logoContainer}>
         <Image source={require('../assets/MicrosoftTeams-image (1).png')} style={styles.logo} />
       </View>
-
       <View style={styles.formContainer}>
         <TextInput
           style={[styles.input, { backgroundColor: '#BFB7FD' }]}
@@ -62,19 +70,14 @@ const CadastroScreen = () => {
           value={confirmaSenha}
           onChangeText={setConfirmaSenha}
         />
-
-        <TouchableOpacity style={styles.button} onPress={navigateToCadastro}>
-          <Text style={styles.buttonText}>Confirme Cadastro</Text>
+        <TouchableOpacity style={styles.button} onPress={navegarToCadastro}>
+          <Text style={styles.buttonText}>Confirmar Cadastro</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={navigateToCadastro}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text
-            style={[
-              styles.loginText,
-              { color: 'white', textDecorationLine: 'underline', fontFamily: 'Verdana, sans-serif' },
-            ]}
+            style={[styles.loginText, { color: 'white', textDecorationLine: 'underline', fontFamily: 'Verdana, sans-serif' }]}
           >
-            Caso já tenha uma conta? Clique aqui para fazer login
+            Já tem uma conta? Faça login
           </Text>
         </TouchableOpacity>
       </View>
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoContainer: {
-    // Estilize seu logo aqui
+    // Estilize seu logotipo aqui
   },
   logo: {
     width: 100,

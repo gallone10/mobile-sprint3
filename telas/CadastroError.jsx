@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Importe o useNavigation
 import { db, doc, updateDoc, deleteDoc } from '../firebase/firebaseConfig';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, createUserWithEmailAndPassword } from "firebase/auth"
 
 export default function App() {
   const [password, setPassword] = useState('');
