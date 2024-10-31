@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { db, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from '../firebase/firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const api = {
+  carregarEmpresas: async () => {
+    const data = await AsyncStorage.getItem('empresas');
+    return data ? JSON.parse(data) : [];
+  },
+  salvarEmpresa: async (empresa) => {
+    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
+    const novaEmpresa = { ...empresa, id: Date.now().toString() };
+    empresas.push(novaEmpresa);
+    await AsyncStorage.setItem('empresas', JSON.stringify(empresas));
+    return novaEmpresa;
+  },
+  atualizarEmpresa: async (id, empresa) => {
+    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
+    const index = empresas.findIndex((e) => e.id === id);
+    empresas[index] = { id, ...empresa };
+    await AsyncStorage.setItem('empresas', JSON.stringify(empresas));
+    return empresas[index];
+  },
+  excluirEmpresa: async (id) => {
+    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
+    const empresasFiltradas = empresas.filter((empresa) => empresa.id !== id);
+    await AsyncStorage.setItem('empresas', JSON.stringify(empresasFiltradas));
+    return id;
+  },
+};
 
 const CadastroEmpresa = () => {
   const [nome, setNome] = useState('');
@@ -13,38 +40,38 @@ const CadastroEmpresa = () => {
     carregarEmpresas();
   }, []);
 
-  const carregarEmpresas = () => {
-
-    setEmpresas([]);
+  const carregarEmpresas = async () => {
+    const empresasCarregadas = await api.carregarEmpresas();
+    setEmpresas(empresasCarregadas);
   };
 
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     if (!nome || !cnpj || !endereco) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos antes de cadastrar.');
       return;
     }
 
     if (editandoId) {
+      const empresaAtualizada = await api.atualizarEmpresa(editandoId, { nome, cnpj, endereco });
       const empresasAtualizadas = empresas.map((empresa) =>
-        empresa.id === editandoId ? { id: editandoId, nome, cnpj, endereco } : empresa
+        empresa.id === editandoId ? empresaAtualizada : empresa
       );
       setEmpresas(empresasAtualizadas);
       Alert.alert('Sucesso', 'Empresa atualizada com sucesso.');
       setEditandoId(null);
     } else {
-      
-      const novaEmpresa = { id: Date.now().toString(), nome, cnpj, endereco };
+      const novaEmpresa = await api.salvarEmpresa({ nome, cnpj, endereco });
       setEmpresas([...empresas, novaEmpresa]);
       Alert.alert('Sucesso', 'Empresa cadastrada com sucesso.');
     }
 
-  
     setNome('');
     setCnpj('');
     setEndereco('');
   };
 
-  const handleExcluir = (id) => {
+  const handleExcluir = async (id) => {
+    await api.excluirEmpresa(id);
     const empresasAtualizadas = empresas.filter((empresa) => empresa.id !== id);
     setEmpresas(empresasAtualizadas);
     Alert.alert('Sucesso', 'Empresa excluída com sucesso.');
