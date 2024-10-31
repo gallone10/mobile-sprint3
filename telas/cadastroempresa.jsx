@@ -1,210 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView, View, Text, TextInput, Button, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { collection, addDoc, getDocs, deleteDoc, doc, db } from '../firebase/firebaseConfig'; // Certifique-se de apontar para seu arquivo firebaseConfig
 
-const api = {
-  carregarEmpresas: async () => {
-    const data = await AsyncStorage.getItem('empresas');
-    return data ? JSON.parse(data) : [];
-  },
-  salvarEmpresa: async (empresa) => {
-    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
-    const novaEmpresa = { ...empresa, id: Date.now().toString() };
-    empresas.push(novaEmpresa);
-    await AsyncStorage.setItem('empresas', JSON.stringify(empresas));
-    return novaEmpresa;
-  },
-  atualizarEmpresa: async (id, empresa) => {
-    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
-    const index = empresas.findIndex((e) => e.id === id);
-    empresas[index] = { id, ...empresa };
-    await AsyncStorage.setItem('empresas', JSON.stringify(empresas));
-    return empresas[index];
-  },
-  excluirEmpresa: async (id) => {
-    const empresas = JSON.parse(await AsyncStorage.getItem('empresas')) || [];
-    const empresasFiltradas = empresas.filter((empresa) => empresa.id !== id);
-    await AsyncStorage.setItem('empresas', JSON.stringify(empresasFiltradas));
-    return id;
-  },
-};
-
-const CadastroEmpresa = () => {
-  const [nome, setNome] = useState('');
+export default function HomeScreen() {
+  const [nomeEmpresa, setNomeEmpresa] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [endereco, setEndereco] = useState('');
-  const [empresas, setEmpresas] = useState([]);
-  const [editandoId, setEditandoId] = useState(null);
+  const [empresasList, setEmpresasList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const addEmpresa = async () => {
+    setLoading(true);
+    try {
+      const docRef = await addDoc(collection(db, "Empresas"), {
+        nomeEmpresa: nomeEmpresa,
+        cnpj: cnpj,
+        endereco: endereco,
+      });
+      alert("EMPRESA CADASTRADA");
+      console.log("Empresa cadastrada com ID: ", docRef.id);
+      setNomeEmpresa('');
+      setCnpj('');
+      setEndereco('');
+      getEmpresas();
+    } catch (e) {
+      console.error("Erro ao adicionar documento: ", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getEmpresas = async () => {
+    setLoading(true);
+    try {
+      const empresas = [];
+      const querySnapshot = await getDocs(collection(db, "Empresas"));
+      querySnapshot.forEach((doc) => {
+        empresas.push({
+          id: doc.id,
+          nomeEmpresa: doc.data().nomeEmpresa,
+          cnpj: doc.data().cnpj,
+          endereco: doc.data().endereco,
+        });
+      });
+      setEmpresasList(empresas);
+      console.log("Empresas carregadas: ", empresas);
+    } catch (e) {
+      console.error("Erro ao carregar documentos: ", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteEmpresas = async () => {
+    setLoading(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, "Empresas"));
+      await Promise.all(querySnapshot.docs.map((item) => deleteDoc(doc(db, "Empresas", item.id))));
+      alert("Todas as empresas foram excluídas.");
+      getEmpresas();
+    } catch (e) {
+      console.error("Erro ao deletar documentos: ", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    carregarEmpresas();
+    getEmpresas();
   }, []);
 
-  const carregarEmpresas = async () => {
-    const empresasCarregadas = await api.carregarEmpresas();
-    setEmpresas(empresasCarregadas);
-  };
-
-  const handleSalvar = async () => {
-    if (!nome || !cnpj || !endereco) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos antes de cadastrar.');
-      return;
-    }
-
-    if (editandoId) {
-      const empresaAtualizada = await api.atualizarEmpresa(editandoId, { nome, cnpj, endereco });
-      const empresasAtualizadas = empresas.map((empresa) =>
-        empresa.id === editandoId ? empresaAtualizada : empresa
-      );
-      setEmpresas(empresasAtualizadas);
-      Alert.alert('Sucesso', 'Empresa atualizada com sucesso.');
-      setEditandoId(null);
-    } else {
-      const novaEmpresa = await api.salvarEmpresa({ nome, cnpj, endereco });
-      setEmpresas([...empresas, novaEmpresa]);
-      Alert.alert('Sucesso', 'Empresa cadastrada com sucesso.');
-    }
-
-    setNome('');
-    setCnpj('');
-    setEndereco('');
-  };
-
-  const handleExcluir = async (id) => {
-    await api.excluirEmpresa(id);
-    const empresasAtualizadas = empresas.filter((empresa) => empresa.id !== id);
-    setEmpresas(empresasAtualizadas);
-    Alert.alert('Sucesso', 'Empresa excluída com sucesso.');
-  };
-
-  const handleEditar = (empresa) => {
-    setNome(empresa.nome);
-    setCnpj(empresa.cnpj);
-    setEndereco(empresa.endereco);
-    setEditandoId(empresa.id);
-  };
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{editandoId ? 'Editar Empresa' : 'Cadastro de Empresa'}</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.heading}>Cadastro de Empresa</Text>
 
       <TextInput
-        style={styles.input}
         placeholder="Nome da Empresa"
-        value={nome}
-        onChangeText={setNome}
+        value={nomeEmpresa}
+        onChangeText={setNomeEmpresa}
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
         placeholder="CNPJ"
         value={cnpj}
         onChangeText={setCnpj}
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
         placeholder="Endereço"
         value={endereco}
         onChangeText={setEndereco}
+        style={styles.input}
       />
+      
+      <Button title="Cadastrar Empresa" onPress={addEmpresa} color="#6200ea" disabled={loading} />
 
-      <TouchableOpacity onPress={handleSalvar} style={styles.cadastrarButton}>
-        <Text style={styles.cadastrarButtonText}>{editandoId ? 'Salvar Alterações' : 'Cadastrar'}</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.listTitle}>Empresas Cadastradas:</Text>
-      <FlatList
-        data={empresas}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.empresaItem}>
-            <Text style={styles.empresaText}>Nome: {item.nome}</Text>
-            <Text style={styles.empresaText}>CNPJ: {item.cnpj}</Text>
-            <Text style={styles.empresaText}>Endereço: {item.endereco}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={() => handleEditar(item)} style={styles.editButton}>
-                <Text style={styles.buttonText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleExcluir(item.id)} style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <View style={styles.listContainer}>
+        <Text style={styles.heading}>Empresas Cadastradas</Text>
+        <MaterialIcons name="delete" size={24} color="black" onPress={deleteEmpresas} />
+        {loading ? (
+          <ActivityIndicator size="large" color="#6200ea" />
+        ) : empresasList.length > 0 ? (
+          <FlatList
+            data={empresasList}
+            renderItem={({ item }) => (
+              <View style={styles.item}>
+                <Text>Nome: {item.nomeEmpresa}</Text>
+                <Text>CNPJ: {item.cnpj}</Text>
+                <Text>Endereço: {item.endereco}</Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        ) : (
+          <Text style={styles.noData}>Nenhuma empresa cadastrada</Text>
         )}
-      />
-    </View>
+      </View>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#000',
+    padding: 20,
   },
-  title: {
+  heading: {
     fontSize: 24,
+    fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 20,
+    marginVertical: 10,
   },
   input: {
     backgroundColor: '#fff',
     padding: 10,
+    marginVertical: 5,
     borderRadius: 5,
-    marginBottom: 10,
   },
-  cadastrarButton: {
-    backgroundColor: '#6A00F4',
-    paddingVertical: 12,
+  listContainer: {
+    marginTop: 20,
+  },
+  item: {
+    backgroundColor: '#333',
+    padding: 15,
+    marginVertical: 5,
     borderRadius: 5,
-    marginBottom: 20,
-    alignItems: 'center',
   },
-  cadastrarButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  listTitle: {
-    fontSize: 20,
+  noData: {
     color: '#fff',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  empresaItem: {
-    backgroundColor: '#222',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 5,
-  },
-  empresaText: {
-    color: '#fff',
-    marginBottom: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 10,
   },
-  editButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 8,
-    borderRadius: 5,
-    flex: 1,
-    marginRight: 5,
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    paddingVertical: 8,
-    borderRadius: 5,
-    flex: 1,
-    marginLeft: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
 });
-
-export default CadastroEmpresa;
