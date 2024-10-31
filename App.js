@@ -12,6 +12,7 @@ import RedefinirSenha from './telas/RedefinirSenha.jsx';
 import LoginError from "./telas/LoginError.jsx"
 import CadastroError from './telas/CadastroError.jsx';
 import Principal from "./telas/principal.jsx"
+import CadastroEmpresa from './telas/cadastroempresa.jsx';
 
 
 
@@ -31,6 +32,7 @@ const App = () => {
         <Stack.Screen name="LoginError" component={LoginError} />
         <Stack.Screen name="CadastroError" component={CadastroError} />
         <Stack.Screen name="Principal" component={Principal} />
+        <Stack.Screen name="CadastroEmpresa" component={CadastroEmpresa} />
       </Stack.Navigator>
     </NavigationContainer>
   );

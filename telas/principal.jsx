@@ -1,11 +1,9 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-    
       {/* Conteúdo Central */}
       <View style={styles.content}>
         {/* Logo e Nome da Empresa */}
@@ -27,9 +25,17 @@ const HomeScreen = () => {
 
         {/* Imagem do celular */}
         <Image
-          source={require('../assets/logo2.png')} 
+          source={require('../assets/logo2.png')}
           style={styles.phoneImage}
         />
+
+        {/* Botão de Cadastro */}
+        <TouchableOpacity
+          style={styles.registerButton}
+          onPress={() => navigation.navigate('CadastroEmpresa')}
+        >
+          <Text style={styles.registerButtonText}>Clique aqui para cadastrar sua empresa</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -38,18 +44,9 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Fundo preto
+    backgroundColor: '#000', 
     padding: 20,
     justifyContent: 'space-between',
-  },
-  loginButton: {
-    alignSelf: 'flex-end',
-    padding: 10,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    textDecorationLine: 'underline',
   },
   content: {
     flex: 1,
@@ -62,12 +59,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 250,  // Aumentando a largura da logo
-    height: 80, // Aumentando a altura da logo
+    width: 250,  
+    height: 80, 
   },
   companyName: {
     fontSize: 24,
-    color: '#6A00F4', // Cor roxa da logo
+    color: '#6A00F4', 
     marginLeft: 10,
   },
   mainText: {
@@ -85,9 +82,21 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   phoneImage: {
-    width: 350, // Aumentando a largura da imagem do celular
-    height: 300, // Aumentando a altura da imagem do celular
+    width: 350, 
+    height: 300,
     resizeMode: 'contain',
+  },
+  registerButton: {
+    backgroundColor: '#6A00F4',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

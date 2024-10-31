@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
     // Estilize seu logotipo aqui
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 200,
+    height: 200,
   },
   formContainer: {
     width: '80%',

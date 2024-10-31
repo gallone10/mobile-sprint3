@@ -20,7 +20,7 @@ const HomeScreen = () => {
         style={styles.logo}
       />
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#BFB7FD' }]}
+        style={[styles.button, { backgroundColor: '#6A00F4' }]}
         onPress={navigateToCadastro}
       >
         <Text style={[styles.buttonText, { fontFamily: 'Verdana, sans-serif' }]}>

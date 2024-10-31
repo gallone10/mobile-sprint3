@@ -20,7 +20,7 @@ const LoginSuccessScreen = () => {
         Login realizado com sucesso!
       </Text>
       <TouchableOpacity 
-        style={[styles.proceedButton, { backgroundColor: '#BFB7FD' }]} 
+        style={[styles.proceedButton, { backgroundColor: '#6A00F4' }]} 
         onPress={navigateToPrincipal} // Altere aqui para redirecionar à tela 'principal'
       >
         <Text style={[styles.proceedButtonText, { color: '#000', fontFamily: 'Trebuchet MS, sans-serif' }]}>
