@@ -6,6 +6,27 @@ O projeto da Visionary AI está centrado em uma plataforma de IA generativa que 
 
 Com a Visionary AI, as empresas não precisam mais adivinhar o futuro – podem moldá-lo com a ajuda de previsões precisas e insights poderosos. A nossa missão é capacitar nossos clientes a serem verdadeiros líderes de mercado, antecipando tendências e tomando decisões informadas que conduzam ao sucesso.
 
-## diagrama
+API de Cadastro de Empresas
+Esta API permite gerenciar registros de empresas em um aplicativo utilizando o Firebase Firestore como banco de dados. Através dela, é possível cadastrar novas empresas, atualizar informações existentes e excluir registros de forma prática e eficiente.
 
-![alt text](diagrama.png)
+Funcionalidades
+Cadastrar Empresa
+
+Permite ao usuário adicionar uma nova empresa ao banco de dados.
+Os dados da empresa incluem:
+CNPJ: Cadastro Nacional da Pessoa Jurídica, um número único para identificar a empresa.
+Nome: Nome da empresa.
+Endereço: Endereço físico da empresa.
+Implementação: Ao submeter um formulário, os dados são enviados para o Firestore, onde um novo documento é criado na coleção "Empresas".
+Atualizar Empresa
+
+O usuário pode editar informações de uma empresa já cadastrada.
+É possível modificar todos os campos de dados: CNPJ, nome e endereço.
+Implementação: Ao selecionar uma empresa para edição, os dados atuais são carregados no formulário. Após as alterações, os dados são enviados para atualizar o documento correspondente no Firestore.
+Excluir Empresa
+
+Permite ao usuário remover uma empresa do banco de dados.
+Implementação: Ao selecionar uma empresa para exclusão, uma confirmação é solicitada. Se confirmada, o documento correspondente é excluído do Firestore.
+
+Conclusão
+Essa API oferece uma solução robusta para o gerenciamento de empresas, aproveitando a infraestrutura do Firebase Firestore. É ideal para aplicações que necessitam de um backend leve e escalável, permitindo aos usuários realizar operações CRUD de forma intuitiva e eficiente.
